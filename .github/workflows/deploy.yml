@@ -35,10 +35,14 @@ jobs:
         SERVER_IP: ${{ secrets.SERVER_IP }}
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       run: |
+        eval "$(ssh-agent -s)"
         echo "$SSH_PRIVATE_KEY" | ssh-add -
         ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
-          cd /path/to/your/app
+          if [ ! -d "/home/ubuntu/simple-node-app" ]; then
+            git clone https://github.com/sarveshsd/simple-node-app.git /home/ubuntu/simple-node-app
+          fi
+          cd /home/ubuntu/simple-node-app
           git pull origin testing
-          npm install 
+          npm install
           pm2 restart all
         EOF
