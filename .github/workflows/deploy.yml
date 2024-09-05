@@ -38,11 +38,15 @@ jobs:
         eval "$(ssh-agent -s)"
         echo "$SSH_PRIVATE_KEY" | ssh-add -
         ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP << 'EOF'
+          # Install Node.js
+          curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+          sudo npm install -g pm2
           if [ ! -d "/home/ubuntu/simple-node-app" ]; then
             git clone https://github.com/sarveshsd/simple-node-app.git /home/ubuntu/simple-node-app
           fi
           cd /home/ubuntu/simple-node-app
           git pull origin testing
           npm install
-          pm2 restart all
+          pm2 start npm --name simple-node-app -- run start || pm2 restart simple-node-app
         EOF
